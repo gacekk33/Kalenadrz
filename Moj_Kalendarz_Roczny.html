@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Mój kalendarz — plan na cały rok</title>
+  <style>
+    :root {
+      --bg: #090e1a; --panel: #121b2c; --panel-2:#172338; --panel-3:#1d2b42;
+      --line: #28364d; --text:#f3f6ff; --muted:#95a3b9; --teal:#69e5c3;
+      --teal-bg:rgba(105,229,195,.12); --pink:#f4a7d7; --purple:#ada7fc; --gold:#f6cb82;
+      --shadow:0 22px 64px rgba(0,0,0,.24); --radius:20px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;background:radial-gradient(ellipse 70% 26% at 55% -8%,#1e3150 0%,transparent 75%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer}
+    button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+    .shell{max-width:1530px;padding:32px 26px 55px;margin:auto}
+    .topbar,.brand,.top-actions,.hero-top,.hero-stat-row,.workspace-head,.workspace-toolbar,.month-title,.side-heading,.event-actions,.form-actions,.backup-row{display:flex;align-items:center}
+    .topbar{gap:24px;justify-content:space-between;margin-bottom:34px;flex-wrap:wrap}
+    .brand{gap:13px}
+    .brandmark{display:grid;place-items:center;width:47px;height:47px;border-radius:15px;background:linear-gradient(135deg,#72f4ca,#4d99cc);color:#07111c;font-weight:900;font-size:26px;box-shadow:0 10px 28px #4ca9aa33}
+    .brand-name{font-size:19px;font-weight:800;letter-spacing:-.5px}.brand-sub{font-size:12px;color:var(--muted)}
+    .top-actions{gap:10px;flex-wrap:wrap}
+    .btn{border:1px solid var(--line);background:var(--panel-2);border-radius:12px;color:var(--text);padding:11px 15px;display:inline-flex;align-items:center;gap:9px;font-weight:650;font-size:13px;justify-content:center;transition:background .16s,border-color .16s,transform .16s}
+    .btn:hover{background:#22344d;border-color:#4f677e;transform:translateY(-1px)}
+    .btn-primary{background:var(--teal);border-color:var(--teal);color:#061c1d;font-weight:800}.btn-primary:hover{background:#94efd4;border-color:#94efd4}
+    .btn-ghost{background:transparent}.btn-danger{color:#ffb9c5;border-color:#714257;background:#422534}.btn-danger:hover{background:#562c3e}
+    .hero{border:1px solid #2a3d52;border-radius:24px;background:linear-gradient(118deg,#1b3441 0%,#1a283e 47%,#151d30 100%);padding:27px 31px;position:relative;overflow:hidden;margin-bottom:28px}
+    .hero::after{content:"";position:absolute;width:350px;height:350px;right:-110px;top:-190px;border:1px solid #72e0bb45;border-radius:50%;box-shadow:0 0 0 55px #72e0bb0a,0 0 0 110px #72e0bb06;pointer-events:none}
+    .eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+    h1{font-size:clamp(27px,3vw,41px);margin:0 0 7px;letter-spacing:-1.5px;line-height:1.14}
+    .hero p{color:#b5c6d6;margin:0;max-width:650px;font-size:14px}
+    .hero-stat-row{gap:22px;flex-wrap:wrap;margin-top:23px}
+    .stat{padding-right:22px;border-right:1px solid #52657470;min-width:93px}.stat:last-child{border:0}.stat strong{display:block;font-size:24px;line-height:1.2}.stat span{font-size:12px;color:#adbfce}
+    .content{display:grid;grid-template-columns:minmax(0,1fr) 328px;align-items:start;gap:21px}
+    .panel{background:linear-gradient(180deg,#131d2e,#111a29);border:1px solid var(--line);border-radius:var(--radius)}
+    .calendar-panel{padding:22px}.workspace-head{justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+    .section-title{font-size:20px;font-weight:800;letter-spacing:-.55px;margin:0}.section-sub{font-size:12px;color:var(--muted);margin:3px 0 0}
+    .workspace-toolbar{gap:8px;flex-wrap:wrap}
+    .switch{background:#0b1423;border:1px solid var(--line);padding:4px;display:flex;gap:3px;border-radius:12px}
+    .switch button{border:0;border-radius:9px;color:var(--muted);background:transparent;font-weight:700;font-size:12px;padding:9px 12px}
+    .switch button.active{color:#071f1b;background:var(--teal)}
+    .months{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+    .month{min-width:0;background:#19253a;border:1px solid #2d3c55;border-radius:15px;padding:14px 11px 12px;transition:border-color .18s}
+    .month.current-month{border-color:#558e84}
+    .month-title{justify-content:space-between;margin:0 4px 13px;gap:8px;font-size:14px;font-weight:800}
+    .month-count{font-size:10px;color:var(--teal);border-radius:999px;background:#63d6b71b;border:1px solid #63d6b733;padding:3px 7px;font-weight:700;white-space:nowrap}
+    .weekdays,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+    .weekdays{margin-bottom:4px}.weekdays span{text-align:center;color:#8293af;font-size:10px;font-weight:800;padding:3px 0}
+    .day{height:35px;min-width:0;border:1px solid transparent;border-radius:9px;background:transparent;color:#dce6f5;font-size:12px;position:relative;display:flex;justify-content:center;align-items:center;flex-direction:column;gap:2px;padding:3px;transition:background .14s,border-color .14s}
+    .day:not(.blank):hover{background:#30415e}.day.blank{pointer-events:none}
+    .day.has-events .day-number{font-weight:850}
+    .day.selected{background:#2c5360;border-color:#65d9bb;color:white}
+    .day.today .day-number{color:#75f0cf;font-weight:900}.day.selected.today .day-number{color:white}
+    .dots{display:flex;gap:2px;justify-content:center;height:4px}
+    .dot{background:var(--teal);width:4px;height:4px;border-radius:999px}.dot.work{background:var(--purple)}.dot.important{background:var(--pink)}.dot.other{background:var(--gold)}
+    .sidebar{display:flex;flex-direction:column;gap:15px;position:sticky;top:16px}
+    .side-card{padding:21px}.side-heading{justify-content:space-between;gap:10px;margin-bottom:17px}
+    .side-title{font-size:15px;font-weight:800;letter-spacing:-.2px}.side-caption{font-size:11px;color:var(--muted);margin-top:3px}
+    .selected-badge{color:#132f2a;background:var(--teal);border-radius:9px;font-size:10px;padding:6px 8px;font-weight:850}
+    .event-list{display:flex;flex-direction:column;gap:10px}
+    .event{background:#1a293e;border:1px solid #314158;border-radius:13px;padding:13px;position:relative;overflow:hidden}
+    .event:before{content:"";position:absolute;top:0;bottom:0;left:0;width:3px;background:var(--teal)}.event.work:before{background:var(--purple)}.event.important:before{background:var(--pink)}.event.other:before{background:var(--gold)}
+    .event-date{font-size:11px;color:var(--teal);font-weight:800;margin-bottom:6px}.event-title{font-size:13px;font-weight:800;overflow-wrap:anywhere}
+    .event-desc{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#adbed0;margin-top:7px;line-height:1.55}
+    .event-actions{justify-content:flex-end;gap:7px;margin-top:12px}.tiny-btn{border-radius:7px;border:1px solid #41526a;background:#223147;color:#d3e0ef;padding:5px 9px;font-size:11px;font-weight:700}.tiny-btn:hover{background:#324762}.tiny-btn.remove{color:#ffb3c2}.tiny-btn.remove:hover{background:#512c3f}
+    .empty{text-align:center;color:var(--muted);padding:22px 6px;font-size:12px;line-height:1.6}.empty-icon{font-size:26px;margin-bottom:7px;opacity:.75}
+    .side-add{width:100%;margin-top:13px}
+    .upcoming-card{max-height:400px;overflow:auto}.upcoming-card .event{padding:12px}.upcoming-card .event-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .storage-note{border:1px dashed #394b62;border-radius:14px;padding:14px;color:var(--muted);font-size:11px;line-height:1.55}
+    .storage-note b{color:#d5e0f0}.backup-row{gap:7px;margin-top:12px}.backup-row .btn{flex:1;padding:9px 6px;font-size:11px}
+    .reset{margin-top:12px;width:100%;background:transparent;border:1px solid #664050;color:#ed9ead;border-radius:9px;padding:9px;font-size:11px;font-weight:700}.reset:hover{background:#402337}
+    .all-events{display:none}.all-events.open{display:block}.months.hidden{display:none}
+    .list-controls{display:flex;align-items:center;gap:10px;margin-bottom:14px}.search{background:#101928;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:12px 13px;width:100%;outline:0;font-size:13px}.search:focus{border-color:var(--teal)}
+    .all-events-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}.all-events-grid .event{height:100%}
+    .floating-toast{position:fixed;bottom:20px;left:50%;z-index:50;transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:transform .2s,opacity .2s;background:#d2f8e9;color:#10352c;font-size:13px;font-weight:700;padding:11px 17px;border-radius:11px;box-shadow:var(--shadow)}.floating-toast.visible{opacity:1;transform:translate(-50%,0)}
+    dialog{padding:0;border:1px solid #436078;background:#142034;color:var(--text);border-radius:20px;width:min(94vw,490px);box-shadow:var(--shadow)}
+    dialog::backdrop{background:#040913bb;backdrop-filter:blur(6px)}
+    .dialog-inner{padding:25px}.dialog-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+    .dialog-title{font-size:21px;font-weight:850;letter-spacing:-.5px;margin:0}.close{border:1px solid #374b63;background:#202f47;border-radius:9px;color:#d5dfeb;width:33px;height:33px;font-size:20px}
+    .field{margin-bottom:14px}.field label{display:block;color:#b6c8dc;font-size:12px;margin-bottom:7px;font-weight:750}
+    .field input,.field textarea,.field select{background:#0f1a2b;color:var(--text);border:1px solid #3a4e68;border-radius:10px;padding:11px 12px;width:100%;outline:0;font-size:13px}
+    .field textarea{resize:vertical;min-height:104px;max-height:240px}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--teal)}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-actions{justify-content:space-between;gap:10px;margin-top:22px}
+    .help{font-size:11px;color:var(--muted);margin-top:8px}
+    .footer{text-align:center;font-size:11px;color:#7788a3;margin-top:26px}
+    @media(max-width:1240px){.months{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:960px){.content{grid-template-columns:1fr}.sidebar{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar .storage-note{grid-column:1/-1}.months{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:750px){.months{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:580px){.shell{padding:17px 12px 40px}.topbar{margin-bottom:20px}.top-actions{width:100%}.top-actions .btn{flex:1}.hero{padding:22px 17px}.calendar-panel{padding:14px}.months{grid-template-columns:1fr}.month{padding:16px 15px}.day{height:42px}.sidebar{grid-template-columns:1fr}.all-events-grid{grid-template-columns:1fr}.stat{padding-right:13px;margin-right:0;min-width:70px}.form-row{gap:8px}.hero-stat-row{gap:13px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><div class="brandmark" aria-hidden="true">✦</div><div><div class="brand-name">Mój kalendarz</div><div class="brand-sub">Twój prywatny plan na cały rok</div></div></div>
+      <div class="top-actions"><button class="btn btn-ghost" id="todayButton" type="button">◎ &nbsp; Przejdź do dziś</button><button class="btn btn-primary" id="addTopButton" type="button">＋ &nbsp; Dodaj wydarzenie</button></div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Jeden kalendarz. Dwanaście miesięcy.</div>
+      <h1>Wszystkie ważne chwile<br> w jednym miejscu.</h1>
+      <p>Zapisuj plany, dodawaj opisy i wracaj do swoich wydarzeń, kiedy chcesz. Bez przypisywania wydarzeń do konkretnego roku.</p>
+      <div class="hero-stat-row"><div class="stat"><strong id="eventTotal">0</strong><span>Wydarzeń</span></div><div class="stat"><strong id="dayTotal">0</strong><span>Zajętych dni</span></div><div class="stat"><strong id="monthTotal">12</strong><span>Miesięcy</span></div></div>
+    </section>
+
+    <div class="content">
+      <main class="panel calendar-panel">
+        <div class="workspace-head"><div><h2 class="section-title" id="sectionTitle">Kalendarz roczny</h2><p class="section-sub" id="sectionSubtitle">Kliknij dowolny dzień, aby zobaczyć lub dodać wydarzenie.</p></div>
+          <div class="workspace-toolbar"><div class="switch" role="group" aria-label="Widok wydarzeń"><button type="button" id="calendarTab" class="active" aria-pressed="true">Kalendarz</button><button type="button" id="listTab" aria-pressed="false">Lista wydarzeń</button></div></div>
+        </div>
+        <div class="months" id="months" aria-label="Kalendarz na dwanaście miesięcy"></div>
+        <div class="all-events" id="allEvents"><div class="list-controls"><input class="search" type="search" id="search" placeholder="Szukaj po tytule lub opisie..." aria-label="Szukaj wydarzeń" /></div><div class="all-events-grid" id="allEventsGrid"></div></div>
+      </main>
+
+      <aside class="sidebar">
+        <section class="panel side-card">
+          <div class="side-heading"><div><div class="side-title" id="selectedLabel">Wybrany dzień</div><div class="side-caption">Wydarzenia tego dnia</div></div><span class="selected-badge" id="selectedBadge">DZISIAJ</span></div>
+          <div id="selectedEvents" class="event-list"></div>
+          <button class="btn btn-primary side-add" type="button" id="addSelectedButton">＋ Dodaj na ten dzień</button>
+        </section>
+        <section class="panel side-card upcoming-card"><div class="side-heading"><div><div class="side-title">Nadchodzące</div><div class="side-caption">Najbliższe zapisane wydarzenia</div></div></div><div id="upcomingEvents" class="event-list"></div></section>
+        <section class="storage-note"><b>🔒 Twój prywatny kalendarz</b><div>Wszystkie dane zapisują się automatycznie w tej przeglądarce na tym urządzeniu. Nie są wysyłane na serwer. Nie kasuj danych strony bez zrobienia kopii.</div>
+          <div class="backup-row"><button class="btn" id="exportButton" type="button">↓ Eksportuj</button><button class="btn" id="importButton" type="button">↑ Importuj</button></div><input type="file" id="importInput" accept=".json,application/json" hidden /><button class="reset" id="resetButton" type="button">Wyczyść wydarzenia / reset roku</button>
+        </section>
+      </aside>
+    </div>
+    <footer class="footer">Bez konta · Bez konkretnego roku · Zapis lokalny · Jeden plik HTML</footer>
+  </div>
+
+  <dialog id="eventDialog" aria-labelledby="dialogTitle">
+    <div class="dialog-inner"><div class="dialog-head"><h2 class="dialog-title" id="dialogTitle">Nowe wydarzenie</h2><button class="close" id="closeDialog" type="button" aria-label="Zamknij">×</button></div>
+    <form id="eventForm">
+      <div class="field"><label for="eventName">Tytuł wydarzenia *</label><input id="eventName" maxlength="100" required placeholder="Np. Spotkanie, urodziny, wyjazd..." autocomplete="off" /></div>
+      <div class="form-row"><div class="field"><label for="eventMonth">Miesiąc</label><select id="eventMonth" required></select></div><div class="field"><label for="eventDay">Dzień</label><select id="eventDay" required></select></div></div>
+      <div class="form-row"><div class="field"><label for="eventTime">Godzina (opcjonalnie)</label><input id="eventTime" type="time" /></div><div class="field"><label for="eventCategory">Kategoria</label><select id="eventCategory"><option value="personal">Osobiste</option><option value="work">Praca / nauka</option><option value="important">Ważne</option><option value="other">Inne</option></select></div></div>
+      <div class="field"><label for="eventDescription">Opis (opcjonalnie)</label><textarea id="eventDescription" maxlength="3000" placeholder="Dodaj szczegóły, miejsce lub własne notatki..."></textarea><div class="help">Wydarzenie zapisze się bez roku i pozostanie do ręcznego usunięcia lub resetu.</div></div>
+      <div class="form-actions"><button class="btn btn-ghost" id="cancelDialog" type="button">Anuluj</button><button class="btn btn-primary" type="submit" id="saveEvent">Zapisz wydarzenie</button></div>
+    </form></div>
+  </dialog>
+  <div class="floating-toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+      const KEY = 'moj-kalendarz-roczny-v1';
+      const monthNames = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+      const monthGenitive = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+      const catNames = {personal:'Osobiste',work:'Praca / nauka',important:'Ważne',other:'Inne'};
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const todayKey = keyFor(now.getMonth()+1, now.getDate());
+      let selectedKey = todayKey;
+      let editedId = null;
+      let currentView = 'calendar';
+      let toastTimer;
+      const el = id => document.getElementById(id);
+
+      function keyFor(month, day) {return `${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;}
+      function parts(key) {return {month:Number(key.slice(0,2)), day:Number(key.slice(3,5))};}
+      function dateLabel(key) {const {month,day}=parts(key);return `${day} ${monthGenitive[month-1]}`;}
+      function maxDays(month) {return new Date(currentYear,month,0).getDate();}
+      function validKey(key) {
+        if (typeof key !== 'string' || !/^\d{2}-\d{2}$/.test(key)) return false;
+        const {month,day}=parts(key);
+        return month>=1 && month<=12 && day>=1 && day<=new Date(2024,month,0).getDate();
+      }
+      function newId() {return typeof crypto!=='undefined' && crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;}
+      function normalize(e) {
+        if (!e || typeof e!=='object' || !validKey(e.date) || typeof e.title!=='string' || !e.title.trim()) return null;
+        return {id:typeof e.id==='string'&&e.id?e.id:newId(),date:e.date,title:e.title.trim().slice(0,100),description:typeof e.description==='string'?e.description.slice(0,3000):'',time:typeof e.time==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(e.time)?e.time:'',category:catNames[e.category]?e.category:'personal'};
+      }
+      let events = [];
+      let canStore = true;
+      try {const stored=JSON.parse(localStorage.getItem(KEY)||'[]');events=Array.isArray(stored)?stored.map(normalize).filter(Boolean):[];} catch(e){canStore=false;events=[];}
+      function save() {try {localStorage.setItem(KEY,JSON.stringify(events));canStore=true;return true;} catch(e) {canStore=false;alert('Nie udało się zapisać wydarzeń w tej przeglądarce. Wyeksportuj kopię zapasową.');return false;}}
+      function toast(message) {const t=el('toast');t.textContent=message;t.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('visible'),2600);}
+      function sorted() {return [...events].sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time)||a.title.localeCompare(b.title,'pl'));}
+      function eventOnDay(key) {return sorted().filter(e=>e.date===key);}
+      function byNextOccurrence(a,b){
+        const dist=e=>{const {month,day}=parts(e.date);let futureYear=currentYear;let date=new Date(futureYear,month-1,day);const beginning=new Date(currentYear,now.getMonth(),now.getDate());while((date.getMonth()!==month-1||date.getDate()!==day)||date<beginning){futureYear++;date=new Date(futureYear,month-1,day);}return date-beginning;};
+        return dist(a)-dist(b)||a.time.localeCompare(b.time);
+      }
+      function createEventCard(e,withDate=false) {
+        const card=document.createElement('article');card.className=`event ${e.category}`;
+        if(withDate){const d=document.createElement('div');d.className='event-date';d.textContent=`${dateLabel(e.date)}${e.time?' · '+e.time:''}`;card.appendChild(d);}
+        else if(e.time){const d=document.createElement('div');d.className='event-date';d.textContent=e.time;card.appendChild(d);}
+        const title=document.createElement('div');title.className='event-title';title.textContent=e.title;card.appendChild(title);
+        if(e.description){const desc=document.createElement('div');desc.className='event-desc';desc.textContent=e.description;card.appendChild(desc);}
+        const actions=document.createElement('div');actions.className='event-actions';
+        const edit=document.createElement('button');edit.type='button';edit.className='tiny-btn';edit.textContent='Edytuj';edit.addEventListener('click',()=>openDialog(e));
+        const remove=document.createElement('button');remove.type='button';remove.className='tiny-btn remove';remove.textContent='Usuń';remove.addEventListener('click',()=>deleteEvent(e.id));
+        actions.append(edit,remove);card.appendChild(actions);return card;
+      }
+      function emptyNode(label,emoji='✧') {const div=document.createElement('div');div.className='empty';const i=document.createElement('div');i.className='empty-icon';i.textContent=emoji;const s=document.createElement('div');s.textContent=label;div.append(i,s);return div;}
+      function renderMonths() {
+        const container=el('months');container.replaceChildren();
+        const counts=new Map();for(const e of events){counts.set(e.date,(counts.get(e.date)||0)+1);}
+        for(let month=1;month<=12;month++){
+          const monthEl=document.createElement('section');monthEl.className='month'+(now.getMonth()+1===month?' current-month':'');
+          const heading=document.createElement('div');heading.className='month-title';
+          const title=document.createElement('span');title.textContent=monthNames[month-1];
+          const badge=document.createElement('span');badge.className='month-count';const n=events.filter(e=>parts(e.date).month===month).length;badge.textContent=`${n} wydarzeń`;
+          heading.append(title,badge);monthEl.appendChild(heading);
+          const daysHeading=document.createElement('div');daysHeading.className='weekdays';
+          for(const wd of ['Pn','Wt','Śr','Cz','Pt','Sb','Nd']){const span=document.createElement('span');span.textContent=wd;daysHeading.appendChild(span);}
+          monthEl.appendChild(daysHeading);
+          const grid=document.createElement('div');grid.className='days';
+          const emptyCount=(new Date(currentYear,month-1,1).getDay()+6)%7;
+          for(let k=0;k<emptyCount;k++){const blank=document.createElement('div');blank.className='day blank';grid.appendChild(blank);}
+          for(let day=1;day<=maxDays(month);day++){
+            const key=keyFor(month,day), isToday=key===todayKey, isSelected=key===selectedKey;
+            const button=document.createElement('button');button.type='button';button.className='day'+(counts.has(key)?' has-events':'')+(isToday?' today':'')+(isSelected?' selected':'');
+            button.setAttribute('aria-label',`${dateLabel(key)} — ${counts.get(key)||0} wydarzeń${isToday?' — dziś':''}`);
+            button.setAttribute('aria-pressed',String(isSelected));
+            const number=document.createElement('span');number.className='day-number';number.textContent=String(day);button.appendChild(number);
+            const dots=document.createElement('div');dots.className='dots';
+            for(const e of events.filter(e=>e.date===key).slice(0,3)){const dot=document.createElement('span');dot.className='dot '+e.category;dots.appendChild(dot);}
+            button.appendChild(dots);button.addEventListener('click',()=>{selectedKey=key;renderMonths();renderSelected();if(window.innerWidth<961){el('selectedLabel').scrollIntoView({behavior:'smooth',block:'center'});}});
+            grid.appendChild(button);
+          }
+          monthEl.appendChild(grid);container.appendChild(monthEl);
+        }
+      }
+      function renderSelected() {
+        el('selectedLabel').textContent=dateLabel(selectedKey).replace(/^./,c=>c.toUpperCase());
+        const badge=el('selectedBadge');badge.textContent=selectedKey===todayKey?'DZISIAJ':`${eventOnDay(selectedKey).length} WYDARZEŃ`;
+        const box=el('selectedEvents');box.replaceChildren();const dayEvents=eventOnDay(selectedKey);
+        if(!dayEvents.length)box.appendChild(emptyNode('Na ten dzień nie masz jeszcze żadnych wydarzeń.'));
+        else dayEvents.forEach(e=>box.appendChild(createEventCard(e)));
+      }
+      function renderUpcoming() {
+        const box=el('upcomingEvents');box.replaceChildren();
+        if(!events.length)box.appendChild(emptyNode('Dodaj pierwsze wydarzenie, aby zobaczyć je tutaj.'));
+        else [...events].sort(byNextOccurrence).slice(0,6).forEach(e=>box.appendChild(createEventCard(e,true)));
+      }
+      function renderList() {
+        const needle=el('search').value.trim().toLocaleLowerCase('pl');const filtered=sorted().filter(e=>`${e.title} ${e.description} ${dateLabel(e.date)} ${catNames[e.category]}`.toLocaleLowerCase('pl').includes(needle));
+        const box=el('allEventsGrid');box.replaceChildren();
+        if(!filtered.length){const empty=emptyNode(events.length?'Nie znaleziono pasujących wydarzeń.':'Nie masz jeszcze żadnych wydarzeń.');empty.style.gridColumn='1/-1';box.appendChild(empty);}
+        else filtered.forEach(e=>box.appendChild(createEventCard(e,true)));
+      }
+      function render() {
+        el('eventTotal').textContent=events.length;
+        el('dayTotal').textContent=new Set(events.map(e=>e.date)).size;
+        renderMonths();renderSelected();renderUpcoming();renderList();
+      }
+      function setView(view) {
+        currentView=view;
+        const calendar=view==='calendar';
+        el('months').classList.toggle('hidden',!calendar);el('allEvents').classList.toggle('open',!calendar);
+        el('calendarTab').classList.toggle('active',calendar);el('listTab').classList.toggle('active',!calendar);
+        el('calendarTab').setAttribute('aria-pressed',String(calendar));el('listTab').setAttribute('aria-pressed',String(!calendar));
+        el('sectionTitle').textContent=calendar?'Kalendarz roczny':'Wszystkie wydarzenia';
+        el('sectionSubtitle').textContent=calendar?'Kliknij dowolny dzień, aby zobaczyć lub dodać wydarzenie.':'Przeglądaj, wyszukuj, edytuj i usuwaj swoje plany.';
+        if(!calendar)renderList();
+      }
+      function fillDaySelect(preferred) {
+        const month=Number(el('eventMonth').value);const select=el('eventDay');const previous=Number(preferred)||Number(select.value)||1;
+        select.replaceChildren();for(let n=1;n<=maxDays(month);n++){const opt=document.createElement('option');opt.value=n;opt.textContent=n;select.appendChild(opt);}
+        select.value=String(Math.min(previous,maxDays(month)));
+      }
+      function openDialog(event=null) {
+        editedId=event?event.id:null;
+        el('dialogTitle').textContent=event?'Edytuj wydarzenie':'Nowe wydarzenie';el('saveEvent').textContent=event?'Zapisz zmiany':'Zapisz wydarzenie';
+        el('eventForm').reset();
+        const {month,day}=parts(event?event.date:selectedKey);
+        el('eventMonth').value=String(month);fillDaySelect(day);
+        if(event){el('eventName').value=event.title;el('eventTime').value=event.time;el('eventCategory').value=event.category;el('eventDescription').value=event.description;}
+        el('eventDialog').showModal();el('eventName').focus();
+      }
+      function deleteEvent(id) {
+        const e=events.find(ev=>ev.id===id);if(!e)return;
+        if(!confirm(`Usunąć wydarzenie „${e.title}”?`))return;
+        events=events.filter(ev=>ev.id!==id);save();render();toast('Wydarzenie usunięte.');
+      }
+      for(let m=1;m<=12;m++){const option=document.createElement('option');option.value=String(m);option.textContent=monthNames[m-1];el('eventMonth').appendChild(option);}
+      el('eventMonth').addEventListener('change',()=>fillDaySelect());
+      el('eventForm').addEventListener('submit',e=>{
+        e.preventDefault();const title=el('eventName').value.trim();if(!title){el('eventName').focus();return;}
+        const data={date:keyFor(Number(el('eventMonth').value),Number(el('eventDay').value)),title,description:el('eventDescription').value.trim(),time:el('eventTime').value,category:el('eventCategory').value};
+        if(editedId){const index=events.findIndex(ev=>ev.id===editedId);if(index!==-1)events[index]={...events[index],...data};}
+        else events.push({...data,id:newId()});
+        selectedKey=data.date;el('eventDialog').close();save();render();toast(editedId?'Zapisano zmiany.':'Dodano wydarzenie.');editedId=null;
+      });
+      el('closeDialog').addEventListener('click',()=>el('eventDialog').close());
+      el('cancelDialog').addEventListener('click',()=>el('eventDialog').close());
+      el('eventDialog').addEventListener('click',e=>{if(e.target===el('eventDialog'))el('eventDialog').close();});
+      el('addTopButton').addEventListener('click',()=>openDialog());
+      el('addSelectedButton').addEventListener('click',()=>openDialog());
+      el('todayButton').addEventListener('click',()=>{selectedKey=todayKey;setView('calendar');renderMonths();renderSelected();document.querySelector('.month.current-month')?.scrollIntoView({behavior:'smooth',block:'center'});});
+      el('calendarTab').addEventListener('click',()=>setView('calendar'));
+      el('listTab').addEventListener('click',()=>setView('list'));
+      el('search').addEventListener('input',renderList);
+      el('resetButton').addEventListener('click',()=>{
+        if(!events.length){toast('Kalendarz jest już pusty.');return;}
+        if(!confirm(`To usunie WSZYSTKIE wydarzenia (${events.length}) i ich opisy. Tej operacji nie można cofnąć. Najpierw możesz wyeksportować kopię. Kontynuować?`))return;
+        events=[];save();render();toast('Kalendarz wyczyszczony.');
+      });
+      el('exportButton').addEventListener('click',()=>{
+        const blob=new Blob([JSON.stringify({app:'Moj Kalendarz Roczny',version:1,events},null,2)],{type:'application/json;charset=utf-8'});
+        const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download='moj-kalendarz-kopia.json';document.body.appendChild(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Kopia zapasowa gotowa.');
+      });
+      el('importButton').addEventListener('click',()=>el('importInput').click());
+      el('importInput').addEventListener('change',async e=>{
+        const file=e.target.files?.[0];if(!file)return;
+        try{
+          if(file.size>4_000_000)throw Error('Plik jest za duży.');
+          const parsed=JSON.parse(await file.text());const arr=Array.isArray(parsed)?parsed:parsed?.events;
+          if(!Array.isArray(arr))throw Error('Nieprawidłowy format pliku.');
+          if(arr.length>10000)throw Error('Zbyt wiele wydarzeń w pliku.');
+          const imported=arr.map(normalize);
+          if(imported.some(e=>!e))throw Error('Plik zawiera nieprawidłowe wydarzenia.');
+          if(!confirm(`Import zastąpi obecne ${events.length} wydarzeń danymi z pliku (${imported.length}). Kontynuować?`))return;
+          events=imported;save();render();toast('Zaimportowano wydarzenia.');
+        }catch(err){alert('Nie udało się wczytać pliku: '+err.message);}finally{el('importInput').value='';}
+      });
+      render();
+      if(!canStore)toast('Uwaga: zapis lokalny może być niedostępny.');
+    })();
+  </script>
+</body>
+</html>
